@@ -1,10 +1,17 @@
 #Connor Jennings 
 # June/2020
 #########################################################################################################
+# KEY TERMS: 
+#   FeedbackHandler( GTG = Everyting is Good to Go, Error = An Error Occurred )
+IP = "192.168.4.1"
+PORT = 1234
+#########################################################################################################
 #                                           Objects                                                     #
 #########################################################################################################
-
+# Libraries
 import socket               # Import socket module
+import location             # This import is iOS specific
+
 
 
 #########################################################################################################
@@ -40,20 +47,23 @@ class BuildMessage:
         self.lng = lng
         self.timestamp = timestamp
 
-    def SetCords(self):                                                # Get current location 
-        if (self.lat == ""):
-            self.lat = "1234"
+    def SetVariables(self):                                            # Get current location and time
+
+        location.start_updates()                                       # Get location data from Phone
+        loc = location.get_location()
+        location.stop_updates()
+
+        if (self.lat == ""):                                           # Set the Data if it is not already set
+            self.lat = str(loc['latitude'])
         if (self.lng == ""):
-            self.lng = "1234"
+            self.lng = str(loc['longitude'])
+        if (self.timestamp == ""):
+            self.timestamp = str(loc['timestamp'])
         
     
-    def SetTime(self):                                                 # Get current time
-        if (self.timestamp == ""):
-            self.timestamp = "1400"
 
     def Build(self):                                                   # Build  the message 
-        self.SetTime()                                                 # Fetch Data
-        self.SetCords()                                                #   "    "
+        self.SetVariables()                                            # Fetch Data
 
 
         message = self.lat                                             # Format Data
@@ -75,12 +85,22 @@ class Send:
     def SetMessage(self, msg):                                         # Make a new custom message
         self.message = msg
     
-    def Feedbackhandler(self):                                         # Handle feedback from host    
-        print("Error Handled")
+    def Feedbackhandler(self):                                         # Handle feedback from host 
+        if (self.hostfeedback == "GTG"):                               # Successful Transmission
+            print("Message Has Been Sent \n----------------------\n")
+            print("Trasmission Completed\n")
+            return
+        if (self.hostfeedback == "ERROR"):                             # Error Handler
+            print("MESSAGE NOT SENT --> An Error Occured \n")
 
-    def Submit(self):                                                  # Send message to Host and
-        s.send(bytes(self.message, "utf-8"))                           # recieve feedback
-        print("-----------Message Sent----------")                     
+    def Submit(self):                                                  
+        while(self.hostfeedback == ""):                         
+            s.send(bytes(self.message, "utf-8"))                       # Send message to Host
+            print("-----------Message Sent----------")                     
+
+            #feedback = s.recv(1024)                                    # Get Feedback
+            #self.hostfeedback = feedback.decode("utf-8")
+            #Feedbackhandler()
 
 
 #########################################################################################################
@@ -90,7 +110,7 @@ class Communication:
         self.message = message
 
     def Construct(self):
-        connect = BuildConnection("192.168.4.1", 1234)              # Establish Connection  
+        connect = BuildConnection(IP, PORT)              # Establish Connection  
         connect.Connect()
 
         if (self.message == ""):

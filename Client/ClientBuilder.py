@@ -9,8 +9,8 @@ PORT = 1234
 #                                           Objects                                                     #
 #########################################################################################################
 # Libraries
-import socket               # Import socket module
-import location             # This import is iOS specific
+import socket                                                        # Import socket module
+import location                                                      # This import is iOS specific
 
 
 
@@ -37,7 +37,7 @@ class BuildConnection:
     
     def Close(self):
         s.close()
-        print("-->Connection Closed \n")
+        print("-->Connection Closed")
 
 
 #########################################################################################################
@@ -67,10 +67,8 @@ class BuildMessage:
         self.SetVariables()                                            # Fetch Data
 
 
-        message = self.lat                                             # Format Data
-        message += " "
-        message += self.lng
-        message += " "
+        message = self.lat + " "                                       # Format Data
+        message += self.lng + " "
         message += self.timestamp
 
         return message                                                 # Return
@@ -88,15 +86,15 @@ class Send:
     
     def Feedbackhandler(self):                                         # Handle feedback from host 
         if (self.hostfeedback == "GTG"):                               # Successful Transmission
-            print("-->Trasmission Completed \n")
+            print("-->Message is Good")  
             return
         if (self.hostfeedback == "ERROR"):                             # Error Handler
-            print("-->MESSAGE NOT SENT \n\t--> An Error Occured \n")
+            print("-->MESSAGE IS NOT GOOD \n\t-->An Error Occured")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):                         
-            s.send(bytes(self.message, "utf-8"))                       # Send message to Host
-            print("-->Message Sent\n")                     
+            s.send(bytes(self.message, "utf-8"))                       # Send message to Host                   
+            print("-->Message Sent")  
 
             self.hostfeedback ="1"
             feedback = s.recv(1024)                                    # Get Feedback
@@ -111,17 +109,17 @@ class Communication:
         self.message = message
 
     def Construct(self):
-        connect = BuildConnection(IP, PORT)              # Establish Connection  
+        connect = BuildConnection(IP, PORT)                            # Establish Connection  
         connect.Connect()
 
         if (self.message == ""):
-            messageobj = BuildMessage()                             # Build a message to send
+            messageobj = BuildMessage()                                # Build a message to send
             self.message = messageobj.Build()
 
-        send = Send(self.message)                                   # Send the message and deal with errors
+        send = Send(self.message)                                      # Send the message and deal with errors
         send.Submit()
 
-        connect.Close()                                             # Close the socket
+        connect.Close()                                                # Close the socket
 
 
 
@@ -131,7 +129,7 @@ class Communication:
 #########################################################################################################
 
 def main():
-    DOIT = Communication("tst")
+    DOIT = Communication()
     DOIT.Construct()
 
 

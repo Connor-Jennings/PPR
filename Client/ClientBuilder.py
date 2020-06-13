@@ -37,6 +37,7 @@ class BuildConnection:
     
     def Close(self):
         s.close()
+        print("-->Connection Closed \n")
 
 
 #########################################################################################################
@@ -87,20 +88,20 @@ class Send:
     
     def Feedbackhandler(self):                                         # Handle feedback from host 
         if (self.hostfeedback == "GTG"):                               # Successful Transmission
-            print("Message Has Been Sent \n----------------------\n")
-            print("Trasmission Completed\n")
+            print("-->Trasmission Completed \n")
             return
         if (self.hostfeedback == "ERROR"):                             # Error Handler
-            print("MESSAGE NOT SENT --> An Error Occured \n")
+            print("-->MESSAGE NOT SENT \n\t--> An Error Occured \n")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):                         
             s.send(bytes(self.message, "utf-8"))                       # Send message to Host
-            print("-----------Message Sent----------")                     
+            print("-->Message Sent\n")                     
 
-            #feedback = s.recv(1024)                                    # Get Feedback
-            #self.hostfeedback = feedback.decode("utf-8")
-            #Feedbackhandler()
+            self.hostfeedback ="1"
+            feedback = s.recv(1024)                                    # Get Feedback
+            self.hostfeedback = feedback.decode("utf-8")
+            self.Feedbackhandler()
 
 
 #########################################################################################################
@@ -135,6 +136,6 @@ def main():
 
 
 if __name__ == "__main__":
-    print("")
+    print("-------------------------------------------")
     main()
     print("")

@@ -7,7 +7,7 @@
 IP = "192.168.4.1"
 PORT = 1234
 MODE = "ONCE"
-DELAY = 300                                                          # 300 second delay for TRACK mode
+DELAY = 300                                                         # 300 second delay for TRACK mode (5min)
 #########################################################################################################
 #                                           Objects                                                     #
 #########################################################################################################
@@ -20,9 +20,12 @@ import time                                                          # For sleep
 #########################################################################################################
 # Establish a connection between client and server, then prints message from the server
 class BuildConnection:                                                        
-    def __init__(self, ipaddress='', port=0):                         # Initalize variables
+    def __init__(self, ipaddress='', port=0,  message="", hostfeedback="", s=""):                         # Initalize variables
         self.ipaddress = ipaddress        
-        self.port = port                  
+        self.port = port 
+        self.message = message
+        self.hostfeedback = hostfeedback
+        self.s = s               
 
     def SetIP(self, ipa):                                             # Set a new IP Address
         self.ipaddress = ipa
@@ -31,13 +34,29 @@ class BuildConnection:
         self.port = new_port
     
     def Connect(self):
-        global s 
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)         # Create a socket object
-        s.connect((self.ipaddress, self.port))                        # Connnect to new host
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    # Create a socket object
+        self.s.connect((self.ipaddress, self.port))                   # Connnect to new host
 
         msg  = s.recv(1024)                                           # Get message that host should send
         print(msg.decode("utf-8"))                                    # Print that message
     
+     def Feedbackhandler(self):                                       # Handle feedback from host
+        if (self.hostfeedback == "GTG"):                              # Successful Transmission
+            print("-->Message is Good")  
+            return
+        if (self.hostfeedback == "ERROR"):                            # Error Handler
+            print("-->MESSAGE FAILED \n\t-->[Error Description]")
+
+    def Submit(self):                                                  
+        while(self.hostfeedback == ""):                         
+            self.s.send(bytes(self.message, "utf-8"))                 # Send message to Host                   
+            print("-->Message Sent")  
+
+            self.hostfeedback ="1"
+            feedback = s.recv(1024)                                   # Get Feedback
+            self.hostfeedback = feedback.decode("utf-8")
+            self.Feedbackhandler()
+
     def Close(self):
         s.close()
         print("-->Connection Closed")
@@ -52,20 +71,17 @@ class BuildMessage:
         self.timestamp = timestamp
 
     def SetVariables(self):                                            # Get current location and time
-
         location.start_updates()                                       # Get location data from Phone
         loc = location.get_location()
         location.stop_updates()
 
-        if (self.lat == ""):                                           # Set the Data if it is not already set
+        if (self.lat == ""):                                           # Set the Data if it's not already set
             self.lat = str(loc['latitude'])
         if (self.lng == ""):
             self.lng = str(loc['longitude'])
         if (self.timestamp == ""):
             self.timestamp = str(loc['timestamp'])
         
-    
-
     def Build(self):                                                   # Build  the message 
         self.SetVariables()                                            # Fetch Data
 
@@ -114,20 +130,21 @@ class Communication:
         self.delay = delay
 
     def Word(self):
-        connect = BuildConnection(self.ip, self.port)                  # Establish Connection  
-        connect.Connect()
         messageobj = BuildMessage()                                    # Build a message to send
-        send = Send(messageobj.Build())                                # Send the message and deal with errors
-        send.Submit()
+
+        connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
+        connect.Connect()
+                                       
+        connect.Submit()                                               # Send the message and deal with errors
         connect.Close()                                                # Close the socket
+        
+        del connect                                                    # Delete obj to start fresh if "TRACK" is on
 
     def Talk(self):
-        
-
-        if(self.mode == "ONCE"):
+        if(self.mode == "ONCE"):                                       # Sends message then closes session
             self.Word()
         elif (self.mode == "TRACK"):
-            while (True):                                              # Track Continues unitl interuppted 
+            while (True):                                              # TRACK Continues unitl interuppted 
                 self.Word()
                 time.sleep(self.delay)                                 # Wait to send again
         

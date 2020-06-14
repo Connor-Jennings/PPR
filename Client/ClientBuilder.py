@@ -69,7 +69,6 @@ class BuildMessage:
     def Build(self):                                                   # Build  the message 
         self.SetVariables()                                            # Fetch Data
 
-
         message = self.lat + " "                                       # Format Data
         message += self.lng + " "
         message += self.timestamp
@@ -114,19 +113,20 @@ class Communication:
         self.mode = mode
         self.delay = delay
 
+    def Word(self):
+        messageobj = BuildMessage()                                    # Build a message to send
+        send = Send(messageobj.Build())                                # Send the message and deal with errors
+        send.Submit()
+
     def Talk(self):
         connect = BuildConnection(self.ip, self.port)                  # Establish Connection  
         connect.Connect()
 
         if(self.mode == "ONCE"):
-            messageobj = BuildMessage()                                # Build a message to send
-            send = Send(messageobj.Build())                            # Send the message and deal with errors
-            send.Submit()
+            self.Word()
         elif (self.mode == "TRACK"):
             while (True):                                              # Track Continues unitl interuppted 
-                messageobj = BuildMessage()                            # Build a message to send
-                send = Send(messageobj.Build())                        # Send the message and deal with errors
-                send.Submit()
+                self.Word()
                 time.sleep(self.delay)                                 # Wait to send again
         connect.Close()                                                # Close the socket
 

@@ -3,15 +3,18 @@
 #########################################################################################################
 # KEY TERMS: 
 #   FeedbackHandler( GTG = Everyting is Good to Go, Error = An Error Occurred )
+#   Communication.Talk(ONCE = send one time[default], TRACK = send at intervals unitl stopped) -->MODE
 IP = "192.168.4.1"
 PORT = 1234
+MODE = "ONCE"
+DELAY = 300                                                          # 300 second delay for TRACK mode
 #########################################################################################################
 #                                           Objects                                                     #
 #########################################################################################################
 # Libraries
 import socket                                                        # Import socket module
 import location                                                      # This import is iOS specific
-
+import time                                                          # For sleep() in Communication obj
 
 
 #########################################################################################################
@@ -89,7 +92,7 @@ class Send:
             print("-->Message is Good")  
             return
         if (self.hostfeedback == "ERROR"):                             # Error Handler
-            print("-->MESSAGE IS NOT GOOD \n\t-->An Error Occured")
+            print("-->MESSAGE FAILED \n\t-->[Error Description]")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):                         
@@ -105,20 +108,26 @@ class Send:
 #########################################################################################################
 # Goes through all of the steps to complete a communication with the Host
 class Communication:
-    def __init__(self, message=""):
-        self.message = message
+    def __init__(self, ip="", port="", mode="", delay=""):
+        self.ip = ip
+        self.port = port
+        self.mode = mode
+        self.delay = delay
 
-    def Construct(self):
-        connect = BuildConnection(IP, PORT)                            # Establish Connection  
+    def Talk(self):
+        connect = BuildConnection(self.ip, self.port)                  # Establish Connection  
         connect.Connect()
 
-        if (self.message == ""):
+        if(self.mode == "ONCE"):
             messageobj = BuildMessage()                                # Build a message to send
-            self.message = messageobj.Build()
-
-        send = Send(self.message)                                      # Send the message and deal with errors
-        send.Submit()
-
+            send = Send(messageobj.Build())                            # Send the message and deal with errors
+            send.Submit()
+        elif (self.mode == "TRACK"):
+            while (True):                                              # Track Continues unitl interuppted 
+                messageobj = BuildMessage()                            # Build a message to send
+                send = Send(messageobj.Build())                        # Send the message and deal with errors
+                send.Submit()
+                time.sleep(self.delay)                                 # Wait to send again
         connect.Close()                                                # Close the socket
 
 
@@ -129,8 +138,8 @@ class Communication:
 #########################################################################################################
 
 def main():
-    DOIT = Communication()
-    DOIT.Construct()
+    GPS = Communication(IP, PORT, MODE, DELAY)                         # Initialize the builder 
+    GPS.Talk()                                                         # Start the communication                        
 
 
 if __name__ == "__main__":

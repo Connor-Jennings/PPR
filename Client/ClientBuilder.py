@@ -114,13 +114,15 @@ class Communication:
         self.delay = delay
 
     def Word(self):
+        connect = BuildConnection(self.ip, self.port)                  # Establish Connection  
+        connect.Connect()
         messageobj = BuildMessage()                                    # Build a message to send
         send = Send(messageobj.Build())                                # Send the message and deal with errors
         send.Submit()
+        connect.Close()                                                # Close the socket
 
     def Talk(self):
-        connect = BuildConnection(self.ip, self.port)                  # Establish Connection  
-        connect.Connect()
+        
 
         if(self.mode == "ONCE"):
             self.Word()
@@ -128,7 +130,7 @@ class Communication:
             while (True):                                              # Track Continues unitl interuppted 
                 self.Word()
                 time.sleep(self.delay)                                 # Wait to send again
-        connect.Close()                                                # Close the socket
+        
 
 
 

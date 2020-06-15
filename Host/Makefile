@@ -1,5 +1,5 @@
 #Use the g++ compiler
-CC=g++
+CC=clang++
 
 #Compile time flags
 CFLAGS = -Wall -c

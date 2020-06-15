@@ -7,6 +7,7 @@
 
 
 int main(){
-    std::cout << ("It compiled and worked");
+    Builder instance;
+    instance.Construct();
     return 0;
 }

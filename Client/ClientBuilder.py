@@ -1,9 +1,10 @@
-#Connor Jennings 
+# Connor Jennings 
 # June/2020
 #########################################################################################################
 # KEY TERMS: 
 #   FeedbackHandler( GTG = Everyting is Good to Go, Error = An Error Occurred )
-#   Communication.Talk(ONCE = send one time[default], TRACK = send at intervals unitl stopped) -->MODE
+#   Communication.Talk(ONCE = send one time[default], TRACK = send at intervals unitl stopped
+#       TXT = written message appended to end of normal message) -->MODE
 IP = "192.168.4.1"
 PORT = 1234
 MODE = "ONCE"
@@ -65,7 +66,8 @@ class BuildConnection:
 #########################################################################################################
 # Build a message to send to the host, it consists of coordinates and a timestamp 
 class BuildMessage:
-    def __init__(self, lat="", lng="", timestamp=""):                  
+    def __init__(self, txt= "", lat="", lng="", timestamp=""):
+        self.txt = txt                  
         self.lat = lat
         self.lng = lng
         self.timestamp = timestamp
@@ -88,36 +90,10 @@ class BuildMessage:
         message = self.lat + " "                                       # Format Data
         message += self.lng + " "
         message += self.timestamp
+        if(self.txt != ""):
+            message += " " + self.txt
 
         return message                                                 # Return
-
-
-#########################################################################################################
-# Send a message to the host, this only works if a connection has been established through a socket
-class Send:
-    def __init__(self, message="", hostfeedback=""):
-        self.message = message
-        self.hostfeedback = hostfeedback
-
-    def SetMessage(self, msg):                                         # Make a new custom message
-        self.message = msg
-    
-    def Feedbackhandler(self):                                         # Handle feedback from host 
-        if (self.hostfeedback == "GTG"):                               # Successful Transmission
-            print("-->Message is Good")  
-            return
-        if (self.hostfeedback == "ERROR"):                             # Error Handler
-            print("-->MESSAGE FAILED \n\t-->[Error Description]")
-
-    def Submit(self):                                                  
-        while(self.hostfeedback == ""):                         
-            s.send(bytes(self.message, "utf-8"))                       # Send message to Host                   
-            print("-->Message Sent")  
-
-            self.hostfeedback ="1"
-            feedback = s.recv(1024)                                    # Get Feedback
-            self.hostfeedback = feedback.decode("utf-8")
-            self.Feedbackhandler()
 
 
 #########################################################################################################
@@ -129,8 +105,8 @@ class Communication:
         self.mode = mode
         self.delay = delay
 
-    def Word(self):
-        messageobj = BuildMessage()                                    # Build a message to send
+    def Word(self, txt=""):
+        messageobj = BuildMessage(txt)                                    # Build a message to send
 
         connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
         connect.Connect()
@@ -143,14 +119,14 @@ class Communication:
     def Talk(self):
         if(self.mode == "ONCE"):                                       # Sends message then closes session
             self.Word()
-        elif (self.mode == "TRACK"):
+        elif(self.mode == "TRACK"):
             while (True):                                              # TRACK Continues unitl interuppted 
                 self.Word()
                 time.sleep(self.delay)                                 # Wait to send again
+        elif(self.mode == "TXT"):
+            txt = input("Enter Message: ")
+            self.Word(txt)
         
-
-
-
 
 #########################################################################################################
 #                                           MAIN                                                        #

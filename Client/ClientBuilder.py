@@ -16,7 +16,8 @@ DELAY = 300                                                         # 300 second
 import socket                                                        # Import socket module
 import location                                                      # This import is iOS specific
 import time                                                          # For sleep() in Communication obj
-
+import array                                                         # Data container
+import json                                                          # For sending data
 
 #########################################################################################################
 # Establish a connection between client and server, then prints message from the server
@@ -49,9 +50,13 @@ class BuildConnection:
             print("-->MESSAGE FAILED \n\t-->[Error Description]")
 
     def Submit(self):                                                  
-        while(self.hostfeedback == ""):                         
-            self.s.send(bytes(self.message, "utf-8"))                 # Send message to Host                   
-            print("-->Message Sent" + " ( " + self.message+ " ) ")  
+        while(self.hostfeedback == ""):
+            data = json.dumps({"array": self.message})                    
+            self.s.send(data.encode())                                # Send message to Host                   
+            print("-->Message Sent" + " ( ", end ="")
+            for i in (self.message):
+                print(i, end=" ") 
+            print(" ) ")  
 
             self.hostfeedback ="1"
             feedback = self.s.recv(1024)                              # Get Feedback
@@ -87,11 +92,11 @@ class BuildMessage:
     def Build(self):                                                   # Build  the message 
         self.SetVariables()                                            # Fetch Data
 
-        message = self.lat + " "                                       # Format Data
-        message += self.lng + " "
-        message += self.timestamp
+        message = [self.lat]                                           # Format Data
+        message.append(self.lng)
+        message.append(self.timestamp)
         if(self.txt != ""):
-            message += " " + self.txt
+            message.append(self.txt)
 
         return message                                                 # Return
 
@@ -106,7 +111,7 @@ class Communication:
         self.delay = delay
 
     def Word(self, txt=""):
-        messageobj = BuildMessage(txt)                                    # Build a message to send
+        messageobj = BuildMessage(txt)                                 # Build a message to send
 
         connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
         connect.Connect()

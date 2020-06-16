@@ -12,7 +12,7 @@
 void Builder::Construct(){                                       // Use other classes to carry out the servers duty
   std::cout<< "--------Server Started--------" << std::endl;
   Connect GPS(IP, PORT, 0);
-  code = GPS.EstablishConnection();
+  int code = GPS.EstablishConnection();
   GPS.Listen();
   GPS.CloseConnection();
 }

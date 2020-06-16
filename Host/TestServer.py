@@ -1,4 +1,7 @@
-# Testing Script 
+# Connor Jennings
+# June/2020
+# TestServer.py
+# This script is just for testing the client script
 
 import socket                                                # Import socket module
 import json

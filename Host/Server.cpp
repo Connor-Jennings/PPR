@@ -1,30 +1,121 @@
 // Connor Jennings
 // June/2020
+// Server.cpp
 
 #include "Server.h"
-#include <iterator>
+
+// Macros
+#define IP "192.168.4.1"
+#define PORT 1234
 
 //                                Builder Function                                         //
-void Builder::Construct(){
-  std::cout<< "THis shit worked yooooooooooooooo\n";
+void Builder::Construct(){                                       // Use other classes to carry out the servers duty
+  std::cout<< "--------Server Started--------" << std::endl;
+  Connect GPS (IP, PORT, 0);
+  GPS.EstablishConnection();
+  GPS.Listen();
+  GPS.CloseConnection();
 }
 
 
 //                                Connect Functions                                       //
-Connect::Connect(std::string set_ip, int set_port, std::vector<std::string> set_message, int set_stream){  // Constructor
+Connect::Connect(std::string set_ip, int set_port, int set_clientSocket){  // Constructor
   ip = set_ip;
   port = set_port;
-  message = set_message;
-  stream = set_stream;
+  clientSocket = set_clientSocket;
 }
 
-void Connect::EstablishConnection(){                            // Establish this device as a server using "ip" and "port"
+int Connect::EstablishConnection(){                            // Establish this device as a server using "ip" and "port"
+  // Create a socket
+  int listening = socket(AF_INET, SOCK_STREAM, 0);
+  if(listening == -1){
+      std::cerr << "Can't create a socket!" << std::endl;
+      return -1;
+  }
+  // Bind the socket to a IP / port
+  sockaddr_in hint;
+  hint.sin_family = AF_INET;
+  hint.sin_port = htons(port);                            // htons means host to network short 
+  inet_pton(AF_INET, ip, &hint.sin_addr);  
+
+  if (bind(listening, (sockaddr*)&hint, sizeof(hint)) == -1){
+      std::cerr << "Can't bind to IP/port" << std::endl;
+      return -2;
+  }
+
+  // Mark the socket for listening
+  if ((listen(listening, SOMAXCONN)) == -1){
+      std::cerr << "Can't listen!" << std::endl;
+      return -3;
+  }
+
+  // Accept a call
+  sockaddr_in client;
+  socklen_t clientSize = sizeof(client);
+  char host[NI_MAXHOST];
+  char svc[NI_MAXSERV];
+
+  clientSocket = accept(listening, 
+                          (sockaddr*)&client, 
+                          &clientSize);
+
+  if (clientSocket == -1){
+      std::cerr << "Problem with client connecting!" << std::endl;
+      return -4;
+  }
+
+  // Close the listening socket
+  close(listening);
+
+  memset (host , 0, NI_MAXHOST);
+  memset (svc, 0, NI_MAXSERV);
+
+  int result = getnameinfo((sockaddr*)&client, 
+                          sizeof(client),
+                          host,
+                          NI_MAXHOST,
+                          svc,
+                          NI_MAXSERV,
+                          0);
+  if (result){
+      std::cout << host << " connected on " << svc << std::endl;
+  }
+  else {
+      inet_ntop(AF_INET, &client.sin_addr, host, NI_MAXHOST);
+      std::cout << host << " connected on " << ntohs(client.sin_port) << std::endl;
+  }
+
+
 }
 
 void Connect::Listen(){                                         // Wait for a connection to be made at "port" and deal with the message
+  // While receiving - display message, echo message
+  char buf [4096];
+  while(true){
+      // Clear the buffer
+      memset(buf, 0, 4096);
+      // Wait for a message
+      int bytesRecv = recv(clientSocket, buf, 4096, 0);
+      if (bytesRecv == -1){
+          std::cerr << "There was a connection issue" << std::endl;
+          break;
+      }
+      if (bytesRecv == 0){
+          std::cout << "The client disconnected" << std::endl;
+          break;
+      }
+
+      // Display message
+      std::cout << "Received: " << string(buf, 0, bytesRecv) << std::endl;
+
+      // Resend message
+      send(clientSocket, buf, bytesRecv + 1, 0);
+  }
 }
 
 void Connect::CloseConnection(){                                // Safely close port and exit program
+  // Close socket
+  close(clientSocket);
 }
 
 std::string Connect::ErrorCheck(std::string[]){                 // Create message to send back to client depending on the data received

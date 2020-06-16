@@ -3,6 +3,12 @@
 // Server.h
 //--------------------------------------Includes----------------------------------------------------//
 #include <iostream>
+#include <sys/types.h>
+#include <unistd.h>
+#include <sys/socket.h>
+#include <netdb.h>
+#include <arpa/inet.h>
+#include <string.h>
 #include <string>
 #include <vector>
 
@@ -25,13 +31,13 @@ class Connect {
   private:
     std::string ip;
     int port;
+    int clientSocket;                                           // Stream variable to use in functions
     std::vector<std::string> message;
-    int stream;                                           // Stream variable to use in functions
 
   public:
-    Connect(std::string, int, std::vector<std::string>, int);           // Constructor
+    Connect(std::string, int, std::vector<std::string>, int); // Constructor
 
-    void EstablishConnection();                           // Establish this device as a server using "ip" and "port"
+    int EstablishConnection();                           // Establish this device as a server using "ip" and "port"
     void Listen();                                        // Wait for a connection to be made at "port" and deal with the message
     void CloseConnection();                               // Safely close port and exit program
     std::string ErrorCheck(std::string[]);                // Create message to send back to client depending on the data received

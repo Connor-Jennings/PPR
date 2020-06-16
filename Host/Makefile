@@ -1,8 +1,12 @@
+# Connor Jennings
+# June/2020
+# Makefile
+
 #Use the g++ compiler
-CC=clang++
+CC=g++
 
 #Compile time flags
-CFLAGS = -Wall -c
+CFLAGS = -Wall 
 
 all : Server
 

@@ -6,6 +6,6 @@
 
 int main(){
     Builder instance;
-    instance.Construct();
-    return 0;
+    code = instance.Construct();
+    return code;
 }

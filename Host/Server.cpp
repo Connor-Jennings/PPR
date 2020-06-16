@@ -11,7 +11,7 @@
 //                                Builder Function                                         //
 void Builder::Construct(){                                       // Use other classes to carry out the servers duty
   std::cout<< "--------Server Started--------" << std::endl;
-  Connect GPS (IP, PORT, 0);
+  Connect GPS(IP, PORT, 0);
   GPS.EstablishConnection();
   GPS.Listen();
   GPS.CloseConnection();
@@ -106,7 +106,7 @@ void Connect::Listen(){                                         // Wait for a co
       }
 
       // Display message
-      std::cout << "Received: " << string(buf, 0, bytesRecv) << std::endl;
+      std::cout << "Received: " << std::string(buf, 0, bytesRecv) << std::endl;
 
       // Resend message
       send(clientSocket, buf, bytesRecv + 1, 0);

@@ -35,7 +35,7 @@ class Connect {
     std::vector<std::string> message;
 
   public:
-    Connect(std::string, int, int); // Constructor
+    Connect(const char*, int, int); // Constructor
 
     int EstablishConnection();                           // Establish this device as a server using "ip" and "port"
     void Listen();                                        // Wait for a connection to be made at "port" and deal with the message

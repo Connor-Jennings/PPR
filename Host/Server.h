@@ -29,7 +29,7 @@ class Builder {
 class Connect {
 
   private:
-    std::string ip;
+    const char* ip;
     int port;
     int clientSocket;                                           // Stream variable to use in functions
     std::vector<std::string> message;

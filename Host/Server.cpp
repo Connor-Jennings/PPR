@@ -19,7 +19,7 @@ void Builder::Construct(){                                       // Use other cl
 
 
 //                                Connect Functions                                       //
-Connect::Connect(std::string set_ip, int set_port, int set_clientSocket){  // Constructor
+Connect::Connect(const char* set_ip, int set_port, int set_clientSocket){  // Constructor
   ip = set_ip;
   port = set_port;
   clientSocket = set_clientSocket;

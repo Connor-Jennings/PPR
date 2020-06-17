@@ -40,15 +40,19 @@ class BuildConnection:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    # Create a socket object
         self.s.connect((self.ipaddress, self.port))                   # Connnect to new host
 
-        msg  = self.s.recv(1024)                                      # Get message that host should send
+        msg  = self.s.recv(4096)                                      # Get message that host should send
         print(msg.decode("utf-8"))                                    # Print that message
     
     def Feedbackhandler(self):                                        # Handle feedback from host
         if (self.hostfeedback == "GTG"):                              # Successful Transmission
-            print("-->Message is Good")  
+            print("-->Message Is Good")  
             return
-        if (self.hostfeedback == "ERROR"):                            # Error Handler
+        elif (self.hostfeedback == "ERROR"):                            # Error Handler
             print("-->MESSAGE FAILED \n\t-->[Error Description]")
+        elif (self.hostfeedback == ""): 
+            print("-->No Feedback From Server\n")
+        else:
+            print("Feedaback From Server Not Recognized\n")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):
@@ -60,7 +64,7 @@ class BuildConnection:
             print(" ) ")  
 
             self.hostfeedback ="1"
-            feedback = self.s.recv(1024)                              # Get Feedback
+            feedback = self.s.recv(4096)                              # Get Feedback
             self.hostfeedback = feedback.decode("utf-8")
             self.Feedbackhandler()
 

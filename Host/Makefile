@@ -6,7 +6,7 @@
 CC=g++
 
 #Compile time flags
-CFLAGS = -Wall 
+CFLAGS = -Wall -O0 -c -fexec-charset=UTF-8
 
 all : Server
 

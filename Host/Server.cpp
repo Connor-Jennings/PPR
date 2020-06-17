@@ -13,8 +13,10 @@ void Builder::Construct(){                                       // Use other cl
   std::cout<< "--------Server Started--------" << std::endl;
   Connect GPS(IP, PORT, 0);
   int code = GPS.EstablishConnection();
-  GPS.Listen();
-  GPS.CloseConnection();
+  if (code == 0){
+    GPS.Listen();
+    GPS.CloseConnection();
+  }
 }
 
 
@@ -35,7 +37,7 @@ int Connect::EstablishConnection(){                            // Establish this
   // Bind the socket to a IP / port
   sockaddr_in hint;
   hint.sin_family = AF_INET;
-  hint.sin_port = htons(port);                            // htons means host to network short 
+  hint.sin_port = htons(port); // htons means host to network short 
   inet_pton(AF_INET, ip, &hint.sin_addr);  
 
   if (bind(listening, (sockaddr*)&hint, sizeof(hint)) == -1){
@@ -85,7 +87,9 @@ int Connect::EstablishConnection(){                            // Establish this
       std::cout << host << " connected on " << ntohs(client.sin_port) << std::endl;
   }
 
-
+  char message[4096] = {'-','-','W','e','l','c','o','m','e','0','t','o','0','t','h','e','0','s','e','r','v','e','r','-','-','\0'};
+  send(clientSocket, message, 4096 , 0);
+  return 0;
 }
 
 void Connect::Listen(){                                         // Wait for a connection to be made at "port" and deal with the message
@@ -109,7 +113,7 @@ void Connect::Listen(){                                         // Wait for a co
       std::cout << "Received: " << std::string(buf, 0, bytesRecv) << std::endl;
 
       // Resend message
-      send(clientSocket, buf, bytesRecv + 1, 0);
+      // send(clientSocket, buf, bytesRecv + 1, 0);
   }
 }
 
@@ -119,6 +123,7 @@ void Connect::CloseConnection(){                                // Safely close 
 }
 
 std::string Connect::ErrorCheck(std::string[]){                 // Create message to send back to client depending on the data received
+  return "";
 }
 
 

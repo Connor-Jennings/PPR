@@ -5,7 +5,7 @@
 # KEY TERMS: 
 #   FeedbackHandler( GTG = Everyting is Good to Go, Error = An Error Occurred )
 #   Communication.Talk(ONCE = send one time[default], TRACK = send at intervals unitl stopped
-#       TXT = written message appended to end of normal message) -->MODE
+#       TXT = written message appended to end of normal message, END = tell server to close socket) -->MODE
 IP = "192.168.4.1"
 PORT = 1234
 MODE = "ONCE"
@@ -45,15 +45,16 @@ class BuildConnection:
         print(msg)                                                    # Print that message
     
     def Feedbackhandler(self):                                        # Handle feedback from host
-        if (self.hostfeedback == "GTG"):                              # Successful Transmission
-            print("-->Message Is Good")  
-            return
-        elif (self.hostfeedback == "ERROR"):                          # Error Handler
-            print("-->MESSAGE FAILED \n\t-->[Error Description]")
+        if (self.hostfeedback == "GTG"):                              
+            print(" ->Message Is Good")  
+        elif (self.hostfeedback == "ERROR"):                          
+            print(" ->MESSAGE FAILED \n\t ->Format Error")
+        elif (self.hostfeedback == "MsgNotSent"):
+            print(" ->MESSAGE FAILED \n\t ->Transmission Error")
         elif (self.hostfeedback == ""): 
-            print("-->No Feedback From Server")
+            print(" ->No Feedback From Server")
         else:
-            print("-->Feedaback From Server Not Recognized")
+            print(" ->Feedaback From Server Not Recognized")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):
@@ -64,12 +65,12 @@ class BuildConnection:
                 print("\t\t" + i) 
 
             feedback = self.s.recv(4096)                              # Get Feedback
-            self.hostfeedback = feedback
+            self.hostfeedback = feedback.decode("utf-8")
             self.Feedbackhandler()
 
     def Close(self):
         self.s.close()
-        print("-->Connection Closed")
+        print(" ->Connection Closed")
 
 
 #########################################################################################################
@@ -115,9 +116,13 @@ class Communication:
         self.delay = delay
 
     def Word(self, txt=""):
-        messageobj = BuildMessage(txt)                                 # Build a message to send
+        if(txt = -1):
+            message = [-1]
+            connect = BuildConnection(self.ip, self.port, message)    # Establish Connection for END mode
+        else:
+            messageobj = BuildMessage(txt)                                    # Build a message to send
+            connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
 
-        connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
         connect.Connect()
                                        
         connect.Submit()                                               # Send the message and deal with errors
@@ -135,6 +140,8 @@ class Communication:
         elif(self.mode == "TXT"):
             txt = input("Enter Message: ")
             self.Word(txt)
+        elif(self.mode == "END")
+            self.Word(-1)
         else:
             print("Mode Not Recognized")
         

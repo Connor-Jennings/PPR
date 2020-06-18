@@ -40,32 +40,31 @@ class BuildConnection:
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)    # Create a socket object
         self.s.connect((self.ipaddress, self.port))                   # Connnect to new host
 
-        msg  = self.s.recv(4096)                                      # Get message that host should send
-        print(msg.decode("utf-8"))                                    # Print that message
+        msg = self.s.recv(4096)                                       # Get message that host should send
+        msg = msg.decode("utf-8")
+        print(msg)                                                    # Print that message
     
     def Feedbackhandler(self):                                        # Handle feedback from host
         if (self.hostfeedback == "GTG"):                              # Successful Transmission
             print("-->Message Is Good")  
             return
-        elif (self.hostfeedback == "ERROR"):                            # Error Handler
+        elif (self.hostfeedback == "ERROR"):                          # Error Handler
             print("-->MESSAGE FAILED \n\t-->[Error Description]")
         elif (self.hostfeedback == ""): 
-            print("-->No Feedback From Server\n")
+            print("-->No Feedback From Server")
         else:
-            print("Feedaback From Server Not Recognized\n")
+            print("-->Feedaback From Server Not Recognized")
 
     def Submit(self):                                                  
         while(self.hostfeedback == ""):
             data = json.dumps({"array": self.message})                    
             self.s.send(data.encode())                                # Send message to Host                   
-            print("-->Message Sent" + " ( ", end ="")
+            print("-->Message Sent: ")
             for i in (self.message):
-                print(i, end=" ") 
-            print(" ) ")  
+                print("\t\t" + i) 
 
-            self.hostfeedback ="1"
             feedback = self.s.recv(4096)                              # Get Feedback
-            self.hostfeedback = feedback.decode("utf-8")
+            self.hostfeedback = feedback
             self.Feedbackhandler()
 
     def Close(self):
@@ -136,6 +135,8 @@ class Communication:
         elif(self.mode == "TXT"):
             txt = input("Enter Message: ")
             self.Word(txt)
+        else:
+            print("Mode Not Recognized")
         
 
 #########################################################################################################

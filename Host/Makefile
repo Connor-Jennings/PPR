@@ -3,10 +3,10 @@
 # Makefile
 
 #Use the g++ compiler
-CC=g++
+CC=clang++
 
 #Compile time flags
-CFLAGS = -Wall -O0 -c -fexec-charset=UTF-8
+CFLAGS = -std=c++17 -Wall -pedantic -O0 -c -fexec-charset=UTF-8
 
 all : Server
 

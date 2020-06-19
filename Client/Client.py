@@ -1,18 +1,19 @@
 # Connor Jennings 
 # June/2020
 # ClientBuilder.py
+
 #########################################################################################################
 # KEY TERMS: 
-#   FeedbackHandler( GTG = Everyting is Good to Go, Error = An Error Occurred )
-#   Communication.Talk(ONCE = send one time[default], TRACK = send at intervals unitl stopped
-#       TXT = written message appended to end of normal message, END = tell server to close socket) -->MODE
+#   In BuildConnection.FeedbackHandler [ GTG = Everyting is Good to Go, 
+#                                       Error = An Error Occurred )
+#   In Communication.Talk ( ONCE = send one time[default], 
+#                           TRACK = send at intervals unitl stopped,
+#                           TXT = written message appended to end of normal message, 
+#                           END = tell server to close socket)  -->MODE
 IP = "192.168.4.1"
 PORT = 1234
 MODE = "ONCE"
 DELAY = 300                                                         # 300 second delay for TRACK mode (5min)
-#########################################################################################################
-#                                           Objects                                                     #
-#########################################################################################################
 # Libraries
 import socket                                                        # Import socket module
 import location                                                      # This import is iOS specific
@@ -21,6 +22,9 @@ import array                                                         # Data cont
 import json                                                          # For sending data
 
 #########################################################################################################
+#                                           Objects                                                     #
+#########################################################################################################
+
 # Establish a connection between client and server, then prints message from the server
 class BuildConnection:                                                        
     def __init__(self, ipaddress='', port=0,  message="", hostfeedback="", s=0): # Initalize variables
@@ -46,7 +50,9 @@ class BuildConnection:
     
     def Feedbackhandler(self):                                        # Handle feedback from host
         if (self.hostfeedback == "GTG"):                              
-            print(" ->Message Is Good")  
+            print(" ->Message Is Good")
+        elif (self.hostfeedback == "FINAL"):
+            print(" ->Server Port Closed")  
         elif (self.hostfeedback == "ERROR"):                          
             print(" ->MESSAGE FAILED \n\t ->Format Error")
         elif (self.hostfeedback == "MsgNotSent"):
@@ -57,20 +63,20 @@ class BuildConnection:
             print(" ->Feedaback From Server Not Recognized")
 
     def Submit(self):                                                  
-        while(self.hostfeedback == ""):
-            data = json.dumps({"array": self.message})                    
-            self.s.send(data.encode())                                # Send message to Host                   
-            print("-->Message Sent: ")
-            for i in (self.message):
-                print("\t\t" + i) 
+        data = json.dumps({"array": self.message})                    
+        self.s.send(data.encode())                                # Send message to Host                   
+        print("-->Message Sent ")
+        for i in (self.message):
+            print("\t\t" + i) 
 
-            feedback = self.s.recv(4096)                              # Get Feedback
-            self.hostfeedback = feedback.decode("utf-8")
-            self.Feedbackhandler()
+        feedback = self.s.recv(4096)                              # Get Feedback
+        self.hostfeedback = feedback.decode("utf-8")
+        self.Feedbackhandler()
 
     def Close(self):
+        self.s.shutdown(socket.SHUT_RDWR)
         self.s.close()
-        print(" ->Connection Closed")
+        print(" ->Client Port Closed")
 
 
 #########################################################################################################
@@ -109,39 +115,37 @@ class BuildMessage:
 #########################################################################################################
 # Goes through all of the steps to complete a communication with the Host
 class Communication:
-    def __init__(self, ip="", port="", mode="", delay=""):
+    def __init__(self, ip="", port="", delay=""):
         self.ip = ip
         self.port = port
-        self.mode = mode
         self.delay = delay
 
     def Word(self, txt=""):
-        if(txt = -1):
+        if(txt == "-1"):
             message = [-1]
-            connect = BuildConnection(self.ip, self.port, message)    # Establish Connection for END mode
+            connect = BuildConnection(self.ip, self.port, message)    # Create connection obj for END mode
         else:
             messageobj = BuildMessage(txt)                                    # Build a message to send
-            connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Establish Connection  
+            connect = BuildConnection(self.ip, self.port, messageobj.Build()) # Create default connection obj  
 
-        connect.Connect()
-                                       
+        connect.Connect()                                              # Establish Connection  
         connect.Submit()                                               # Send the message and deal with errors
         connect.Close()                                                # Close the socket
         
-        del connect                                                    # Delete obj to start fresh if "TRACK" is on
+        del connect                                                    # Delete obj to refresh data
 
-    def Talk(self):
-        if(self.mode == "ONCE"):                                       # Sends message then closes session
+    def Talk(self, mode=""):
+        if(mode == "ONCE" or mode == ""):                                       # Sends message then closes session
             self.Word()
-        elif(self.mode == "TRACK"):
+        elif(mode == "TRACK"):
             while (True):                                              # TRACK Continues unitl interuppted 
                 self.Word()
                 time.sleep(self.delay)                                 # Wait to send again
-        elif(self.mode == "TXT"):
+        elif(mode == "TXT"):
             txt = input("Enter Message: ")
             self.Word(txt)
-        elif(self.mode == "END")
-            self.Word(-1)
+        elif(mode == "END"):
+            self.Word("-1")
         else:
             print("Mode Not Recognized")
         
@@ -151,8 +155,8 @@ class Communication:
 #########################################################################################################
 
 def main():
-    GPS = Communication(IP, PORT, MODE, DELAY)                         # Initialize the builder 
-    GPS.Talk()                                                         # Start the communication                        
+    GPS = Communication(IP, PORT, DELAY)                               # Initialize the builder 
+    GPS.Talk(MODE)                                                     # Start the communication                        
 
 
 if __name__ == "__main__":

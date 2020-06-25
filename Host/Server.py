@@ -7,8 +7,9 @@
 IP = '192.168.4.1'
 PORT = 1234
 # Libraries
-import socket
-import json          
+import socket                                                        # Library for socket connections
+import json                                                          # Library for json message 
+import os                                                            # Library for executing external commands
 
 #########################################################################################################
 #                                           Functions                                                   #
@@ -49,13 +50,12 @@ def main():
         msg = json.loads(msg.decode())                                # Reformat into json obj
         array = msg.get("array")                                      # Extract data
         for i in (array):                                             # Print data
-            print("\t\t"+i)
+            print(("\t\t"+str(i)))
 
         response = Check_data(array)                                  # Check if Data in data is valid
         if (response == "-1"):                                        # If client sends -1 close socket
             clientsocket.send(bytes("FINAL", "utf-8"))
-            s.shutdown(socket.SHUT_RDWR)
-            s.close()
+            os.system('sudo netstat -pan |grep :1234')                # close socket with external command 
             return
 
         formatted_data = Format(array)

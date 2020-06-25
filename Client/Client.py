@@ -67,7 +67,7 @@ class BuildConnection:
         self.s.send(data.encode())                                # Send message to Host                   
         print("-->Message Sent ")
         for i in (self.message):
-            print("\t\t" + i) 
+            print(("\t\t" + str(i))) 
 
         feedback = self.s.recv(4096)                              # Get Feedback
         self.hostfeedback = feedback.decode("utf-8")
@@ -122,7 +122,7 @@ class Communication:
 
     def Word(self, txt=""):
         if(txt == "-1"):
-            message = [-1]
+            message = [txt]
             connect = BuildConnection(self.ip, self.port, message)    # Create connection obj for END mode
         else:
             messageobj = BuildMessage(txt)                                    # Build a message to send

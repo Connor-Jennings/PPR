@@ -3,7 +3,7 @@
 # ClientBuilder.py
 
 #########################################################################################################
-# KEY TERMS: 
+# Key Terms: 
 #   In BuildConnection.FeedbackHandler [ GTG = Everyting is Good to Go, 
 #                                       Error = An Error Occurred )
 #   In Communication.Talk ( ONCE = send one time[default], 

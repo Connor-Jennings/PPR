@@ -13,13 +13,13 @@
 MODE = "TRACK"
 DELAY = 300                                     # 300 second delay for TRACK mode (5min)
 TRIP_ID = "Default" 
-URL = 'http://192.168.86.199:80/addData.html'
+
 
 # Libraries                              
 import location                                                      
 import time                                                          
 import array                                                                                                                
-import requests
+import mechanize
 
 #########################################################################################################
 #                                        FUCNCTIONS                                                     #
@@ -33,19 +33,25 @@ def Output(trip_id="", lat="", lng="", timestamp="", txt=""):
         print('text        : '+txt)
 
 def Submit_data(trip_id="", lat="", lng="", timestamp="", txt=""):
-    # Reach out to the website
-    response = requests.get(URL)
+    br = mechanize.Browser()
+    br.set_handle_equiv(False)
+    br.set_handle_robots(False)
+    br.addheaders = [('User-agent', 'Mozilla/5.0 (X11; U; Linux i686; en-US; rv:1.9.0.1) Gecko/2008071615 Fedora/3.0.1-1.fc9 Firefox/3.0.1')]
+    br.open('https://www.project-found.com/addData.html')
+    
+    response = br.response()
+    
+    br.select_form('myform')
+    
+    br.form['title'] = trip_id
+    br.form['lat'] = lat
+    br.form['lng'] = lng
+    br.form['timeStamp'] = timestamp
+    br.form['txt'] = txt
+    
+    br.submit()
+    print("Data Submitted")
 
-    if(response.status_code == 200):
-        print('Request was successful')
-        parameters = {'title':trip_id,'lat':lat,'lng':lng,'timeStamp':timestamp,'txt':txt}
-        requests.post(URL, data = parameters)
-    elif(response.status_code == 404):
-        print('Site not found')
-    else:
-        print('Some error occured')
-
-        print("Data Submitted")
 
 
 #########################################################################################################

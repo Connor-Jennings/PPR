@@ -86,7 +86,7 @@ def main():
 
             lat = str(avglat/50)                                   # Parse Data
             lng = str(avglng/50)
-            timestamp = str(avgtime/50])
+            timestamp = str(avgtime/50)
             now = avgtime/50
             time_passed = int(now - time_of_last_submission)
 
@@ -101,7 +101,7 @@ def main():
             print()
 
             # sleep for 5 seconds then fetch new data
-            time.sleep(5)                                 
+            time.sleep(10)                                 
 
     # tracking mode has cashing issues when its not isolated
     else:

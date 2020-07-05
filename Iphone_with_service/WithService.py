@@ -68,14 +68,26 @@ def main():
         first_loop = True
         while(True):
             # The location needs to be reset each time because of data being cashed 
-            location.start_updates()                                     # Retreive Data
-            loc = location.get_location()
-            location.stop_updates()
+            avglat =0
+            avglng =0
+            avgtime =0
+            it =0
+            # work around for apples location accuracy restrictions
+            while(it<50):
+                location.start_updates()                                     # Retreive Data
+                loc = location.get_location()
+                location.stop_updates()
+                avglat += loc['latitude']
+                avglng += loc['longitude']
+                avgtime += loc['timestamp']
+                it += 1
 
-            lat = str(loc['latitude'])                                   # Parse Data
-            lng = str(loc['longitude'])
-            timestamp = str(loc['timestamp'])
-            now = loc['timestamp']
+            
+
+            lat = str(avglat/50)                                   # Parse Data
+            lng = str(avglng/50)
+            timestamp = str(avgtime/50])
+            now = avgtime/50
             time_passed = int(now - time_of_last_submission)
 
             Output(TRIP_ID,lat,lng,timestamp)                                    # Output Data

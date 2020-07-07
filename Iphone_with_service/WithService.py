@@ -11,7 +11,7 @@
 #                           TXT = written message appended to end of normal message, 
 #                           END = tell server to close socket)  -->MODE
 MODE = "TRACK"
-DELAY = 300                                     # 300 second delay for TRACK mode (5min)
+DELAY = 150                                     # 300 second delay for TRACK mode (5min)
 TRIP_ID = "Default" 
 
 
@@ -50,7 +50,7 @@ def Submit_data(trip_id="", lat="", lng="", timestamp="", txt=""):
     br.form['txt'] = txt
     
     br.submit()
-    print("Data Submitted")
+    print("Data Submitted", end="")
 
 
 
@@ -66,12 +66,15 @@ def main():
         time_of_last_submission = loc['timestamp']
         
         first_loop = True
+        buffer = []
+
         while(True):
             # The location needs to be reset each time because of data being cashed 
             avglat =0
             avglng =0
             avgtime =0
             it =0
+
             # work around for apples location accuracy restrictions
             while(it<50):
                 location.start_updates()                                     # Retreive Data
@@ -90,17 +93,33 @@ def main():
             now = avgtime/50
             time_passed = int(now - time_of_last_submission)
 
+            current_data = [lat, lng, timestamp]
+
             Output(TRIP_ID,lat,lng,timestamp)                                    # Output Data
             print('time passed : '+ str(time_passed))
            
             # only submit data on first loop and when the DELAY time has been reached
             if(time_passed >= DELAY or first_loop):
-                Submit_data(TRIP_ID,lat,lng,timestamp)
-                time_of_last_submission = now
+                try:
+                    if(len(buffer) == 0):
+                        Submit_data(TRIP_ID, current_data[0], current_data[1], current_data[2])
+                    else:
+                        buf_it = len(buffer) 
+                        while(buf_it > 0):
+                            Submit_data(TRIP_ID, buffer[buf_it-1][0], buffer[buf_it-1][1], buffer[buf_it-1][2])
+                            time_of_last_submission = now
+                            buffer.pop(buf_it-1)
+                            buf_it = buf_it - 1
+                        Submit_data(TRIP_ID, current_data[0], current_data[1], current_data[2])
+                except:
+                    print("Data Not Submitted, Service Error")
+                    buffer.append(current_data)
+               
+                print(" Buffer("+str(len(buffer))+")")
                 first_loop = False
             print()
 
-            # sleep for 5 seconds then fetch new data
+            # sleep for 10 seconds then fetch new data
             time.sleep(10)                                 
 
     # tracking mode has cashing issues when its not isolated

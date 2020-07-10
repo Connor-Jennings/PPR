@@ -53,7 +53,6 @@ def Submit_data(trip_id="", lat="", lng="", timestamp="", txt="", bp=""):
     
     br.submit()
     print("Data Submitted", end=" ")
-    print(get_pressure())
 
 pressure = None
 

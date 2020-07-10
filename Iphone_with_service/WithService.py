@@ -33,7 +33,7 @@ def Output(trip_id="", lat="", lng="", timestamp="", bp="", txt=""):
     if (txt != ""):
         print('text        : '+txt)
  
-def Submit_data(trip_id="", lat="", lng="", timestamp="", txt="", bp=""):
+def Submit_data(trip_id="", lat="", lng="", timestamp="", bp="", txt=""):
     br = mechanize.Browser()
     br.set_handle_equiv(False)
     br.set_handle_robots(False)
@@ -165,7 +165,7 @@ def main():
             timestamp = str(loc['timestamp'])
             bp = str(get_pressure())
  
-            Output(TRIP_ID,lat,lng,bp,timestamp)                                    # Output Data
+            Output(TRIP_ID,lat,lng,timestamp,bp)                                    # Output Data
             Submit_data(TRIP_ID,lat,lng,timestamp,bp)
  
 # TEXT MODE
@@ -182,7 +182,7 @@ def main():
             bp = str(get_pressure())
  
             Output(TRIP_ID,lat,lng,timestamp,bp,txt)                                    # Output Data
-            Submit_data(TRIP_ID,lat,lng,timestamp,txt,bp)
+            Submit_data(TRIP_ID,lat,lng,timestamp,bp,txt)
  
 # ERROR CATCHER
         else:

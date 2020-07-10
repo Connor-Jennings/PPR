@@ -129,14 +129,15 @@ def main():
                 try:
                     if(len(buffer) == 0):
                         Submit_data(TRIP_ID, current_data[0], current_data[1], current_data[2], current_data[3])
+                        time_of_last_submission = now
                     else:
                         buf_it = len(buffer) 
                         while(buf_it > 0):
                             Submit_data(TRIP_ID, buffer[buf_it-1][0], buffer[buf_it-1][1], buffer[buf_it-1][2], buffer[-1][3])
-                            time_of_last_submission = now
                             buffer.pop(buf_it-1)
                             buf_it = buf_it - 1
                         Submit_data(TRIP_ID, current_data[0], current_data[1], current_data[2], current_data[3])
+                        time_of_last_submission = now
                 except:
                     print("Data Not Submitted, Service Error")
                     buffer.append(current_data)

@@ -141,6 +141,7 @@ def main():
                 except:
                     print("Data Not Submitted, Service Error")
                     buffer.append(current_data)
+                    time_of_last_submission = now
                     
                 print("Buffer("+str(len(buffer))+")")
                 first_loop = False

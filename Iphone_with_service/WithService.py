@@ -10,7 +10,7 @@
 #                           TXT = written message appended to end of normal message, 
 #                           END = tell server to close socket)  -->MODE
 MODE = "TRACK"
-DELAY = 150                                     # 300 second delay for TRACK mode (5min)
+DELAY = 250                                     # 300 second delay for TRACK mode (5min)
 TRIP_ID = "Default" 
  
 
@@ -147,8 +147,8 @@ def main():
                 first_loop = False
             print()
  
-            # sleep for 10 seconds then fetch new data
-            time.sleep(10)                                 
+            # sleep for 15 seconds then fetch new data
+            time.sleep(15)                                 
  
     # tracking mode has cashing issues when its not isolated
     else:
